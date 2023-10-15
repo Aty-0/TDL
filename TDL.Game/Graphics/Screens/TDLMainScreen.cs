@@ -781,7 +781,18 @@ namespace TDL.Game.Graphics.Screens
         void LoadTasksFromJson(string path)
         {
             var final_path = path == string.Empty ? @"..\tasks.json" : path;
-            var data = File.ReadAllText(final_path);
+            string data = string.Empty;
+
+            try
+            {
+                data = File.ReadAllText(final_path);
+            }
+            catch(System.IO.FileNotFoundException ex)
+            {
+                Logger.Log($"{ex.Message}", level:LogLevel.Error);
+                return;
+            }
+
             tasks = JsonConvert.DeserializeObject<List<TDLTask>>(data);
 
             // Clear previous if we are had something
