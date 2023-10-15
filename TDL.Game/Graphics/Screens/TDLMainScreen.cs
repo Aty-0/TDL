@@ -749,8 +749,8 @@ namespace TDL.Game.Graphics.Screens
 
         void ClearTasks()
         {
-            // TODO: Error message
-            if(_fileSelector != null)
+            if(_fileSelector != null 
+                || tasks.Count == 0)
             {
                 return;
             }
