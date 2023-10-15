@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Title>TDL Resources</Title>
+    <Product>TDL Resources</Product>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="Textures\**\*" />
+    <EmbeddedResource Include="Fonts\**\*" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="ppy.osu.Framework" Version="2023.1012.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Samples\" />
+  </ItemGroup>
+ 
+</Project>

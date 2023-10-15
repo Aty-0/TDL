@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="Project">
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Description>todo list kekw</Description>
+    <AssemblyName>TDL</AssemblyName>
+    <Title>TDL</Title>
+    <Product>TDL</Product>
+    <Version>0.0.0</Version>
+    <FileVersion>0.0.0</FileVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>TDL.Desktop.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup Label="Project References">
+    <PackageReference Include="ppy.osu.Framework" Version="2023.1012.0" />
+    <ProjectReference Include="..\TDL.Game\TDL.Game.csproj" />
+    <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
+  </ItemGroup>
+</Project>
