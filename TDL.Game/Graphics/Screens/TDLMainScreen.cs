@@ -837,8 +837,16 @@ namespace TDL.Game.Graphics.Screens
                 Logger.Log($"{ex.Message}", level:LogLevel.Error);
                 return;
             }
-
-            tasks = JsonConvert.DeserializeObject<List<TDLTask>>(data);
+            
+            try
+            {
+                tasks = JsonConvert.DeserializeObject<List<TDLTask>>(data);
+            }
+            catch(Newtonsoft.Json.JsonSerializationException ex)
+            {
+                Logger.Log($"{ex.Message}", level: LogLevel.Error);
+                return;
+            }
 
             // Clear previous if we are had something
             _scrollflowContainer.Clear();

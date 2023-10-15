@@ -6,7 +6,7 @@ namespace TDL.Game.Base
     {
         Pending,
         InProgress,
-        Complited,
+        Completed,
     }
 
     public enum TDLPriority

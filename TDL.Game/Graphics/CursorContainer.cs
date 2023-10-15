@@ -25,7 +25,7 @@ namespace TDL.Game.Graphics
         bool ProvidingUserCursor { get; }
     }
 
-    public class DeveloperCursorContainer : Container, IProvideCursor
+    public partial class DeveloperCursorContainer : Container, IProvideCursor
     {
         protected override Container<Drawable> Content => content;
         private readonly Container content;
