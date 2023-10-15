@@ -36,8 +36,7 @@ namespace TDL.Game.Graphics.UI
             Masking = true;
         }
 
-        [BackgroundDependencyLoader]
-        private void load()
+        protected override void LoadComplete()
         {
             ResizeText();      
         }
@@ -109,16 +108,16 @@ namespace TDL.Game.Graphics.UI
 
         protected override bool OnMouseDown(MouseDownEvent e)
         {
-            Content.ScaleTo(_previousScale.X - 0.3f, 4000, Easing.OutQuint);
+            Content.ScaleTo(_previousScale / 2, 4000, Easing.OutQuint);
 
             return base.OnMouseDown(e);
         }
 
         protected override void OnMouseUp(MouseUpEvent e)
         {
-            base.OnMouseUp(e);
+            Content.ScaleTo(_previousScale, 1000, Easing.OutElastic);
 
-            Content.ScaleTo(DisableScaleAnimationOnHover ? _previousScale.X : _previousScale.X + 0.15f, 1000, Easing.OutElastic);
+            base.OnMouseUp(e);
         }
 
         private void enabledChanged(ValueChangedEvent<bool> e)
