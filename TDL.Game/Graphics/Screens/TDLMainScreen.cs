@@ -18,6 +18,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace TDL.Game.Graphics.Screens
 {
@@ -33,19 +34,16 @@ namespace TDL.Game.Graphics.Screens
         private TDLTextBox _descTextBox;
         private TDLBasicText _noneText;
 
-
-        private TDLButton _closeTaskButton;
-        private TDLButton _saveTaskButton;
-        private TDLButton _loadTaskButton;
+        private Container _taskEditContainer;
+        private TDLTextBox   _taskNameTextBox;
+        private TDLTextBox   _taskDescTextBox;
+        private TDLTextBox   _taskPriorityTextBox;
         private TDLBasicText _taskTemplateText;
-        private TDLBasicText _taskNameText;
-        private TDLBasicText _taskDescText;
-        private TDLBasicText _taskPriorityText;
-        private TDLBasicText _taskStatusText;
+        private TDLEnumDrowDown<TDLStatusTask> _taskStatusEnumDrowDown;
+        private TDLEnumDrowDown<TDLPriority> _taskPriorityEnumDrowDown;
 
 
         private TDLEnumDrowDown<TDLPriority> _priorityEnumDrowDown;
-        private TDLEnumDrowDown<TDLStatusTask> _statusEnumDrowDown;
         private BasicScrollContainer _scrollContainer;
         private FillFlowContainer _scrollflowContainer;
 
@@ -132,7 +130,7 @@ namespace TDL.Game.Graphics.Screens
                                             Margin = new MarginPadding(10),
                                             Height = 30,
                                             Width = 250,
-                                            //LengthLimit = 20,
+                                            LengthLimit = 64,
                                             Depth = -1,
                                         },
 
@@ -179,28 +177,7 @@ namespace TDL.Game.Graphics.Screens
                                             Width = 200,
 
                                         },
-                                        // new TDLBasicText
-                                        // {
-                                        //     Text = "Status:",
-                                        //     Anchor = Anchor.TopLeft,
-                                        //     Origin = Anchor.TopLeft,
-                                        //     Margin = new MarginPadding(10),
-                                        //     Colour = new Color4(200, 200, 200, 255),
-                                        //     Depth = -1,
-                                        //     Scale = new Vector2(1.0f, 1.0f),
-                                        // },
-                                        // _statusEnumDrowDown = new TDLEnumDrowDown<TDLStatusTask>
-                                        // {
-                                        //     //RelativeSizeAxes = Axes.Both,
-                                        //     Anchor = Anchor.TopLeft,
-                                        //     Origin = Anchor.TopLeft,
-                                        //     Margin = new MarginPadding(10),
-                                        //     Colour = new Color4(200, 200, 200, 255),
-                                        //     Depth = -1,
-                                        //     Scale = new Vector2(1.2f, 1.2f),
-                                        //     Width = 200,
-                                        // 
-                                        // },
+
                                         new TDLButton
                                         {
                                               Anchor = Anchor.TopLeft,
@@ -276,7 +253,8 @@ namespace TDL.Game.Graphics.Screens
                         CornerRadius = 10,
                         //RelativeSizeAxes = Axes.Both,
                         Width = 1200,
-                        Height = 800,
+                        Height = 1100,
+                        //RelativeSizeAxes = Axes.Y,
                         Masking = true,
                         //Position = new Vector2(160.0f, 0.0f),
                         Scale = new Vector2(0.6f, 0.6f),
@@ -295,6 +273,7 @@ namespace TDL.Game.Graphics.Screens
                                 Position = new Vector2(0.0f, 0.0f),
                                 Scale = new Vector2(3.0f, 3.0f),
                             },
+                            
                             _noneText = new TDLBasicText
                             {
                                 Text = "None",
@@ -305,99 +284,170 @@ namespace TDL.Game.Graphics.Screens
                                 Margin = new MarginPadding{ Bottom = 10 },
                                 Scale = new Vector2(3.0f, 3.0f),
                             },
-                            new FillFlowContainer
+
+                            _taskEditContainer = new Container
                             {
-                                Direction = FillDirection.Horizontal,
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
                                 RelativeSizeAxes = Axes.Both,
+                                Scale = new Vector2(0.9f, 0.9f),
                                 Children = new Drawable[]
                                 {
-                                    _closeTaskButton = new TDLButton
+                                    new FillFlowContainer
                                     {
-                                          Anchor = Anchor.BottomRight,
-                                          Origin = Anchor.BottomRight,
-                                          Margin = new MarginPadding { Left = 30, Top = 10 },
-                                          Size = new Vector2(100, 75),
-                                          Scale = new Vector2(2,2),
-                                          Text = "Close task",
-                                          onButtonClick = CloseTask,
+                                        Direction = FillDirection.Horizontal,
+                                        RelativeSizeAxes = Axes.Both,
+                                        Children = new Drawable[]
+                                        {
+                                            new TDLButton
+                                            {
+                                                  Anchor = Anchor.BottomRight,
+                                                  Origin = Anchor.BottomRight,
+                                                  Margin = new MarginPadding { Left = 30, Top = 10 },
+                                                  Size = new Vector2(100, 75),
+                                                  Scale = new Vector2(2,2),
+                                                  Text = "Close task",
+                                                  onButtonClick = CloseTask,
+                                            },
+                                            new TDLButton
+                                            {
+                                                  Anchor = Anchor.BottomRight,
+                                                  Origin = Anchor.BottomRight,
+                                                  Margin = new MarginPadding { Left = 10, Top = 10},
+                                                  Size = new Vector2(100, 75),
+                                                  Scale = new Vector2(2,2),
+                                                  Text = "Save to",
+                                                  onButtonClick = SaveFileButtonAction,
+                                            },
+                                            new TDLButton
+                                            {
+                                                  Anchor = Anchor.BottomRight,
+                                                  Origin = Anchor.BottomRight,
+                                                  Margin = new MarginPadding { Left = 10, Top = 10},
+                                                  Size = new Vector2(100, 75),
+                                                  Scale = new Vector2(2,2),
+                                                  Text = "Save",
+                                                  onButtonClick = Save,
+                                            },
+                                            new TDLButton
+                                            {
+                                                  Anchor = Anchor.BottomRight,
+                                                  Origin = Anchor.BottomRight,
+                                                  Margin = new MarginPadding { Left = 10, Top = 10},
+                                                  Size = new Vector2(100, 75),
+                                                  Scale = new Vector2(2,2),
+                                                  Text = "Open file",
+                                                  onButtonClick = OpenFileButtonAction,
+                                            },
+                                        }
                                     },
-                                    _saveTaskButton = new TDLButton
+                                    new FillFlowContainer
                                     {
-                                          Anchor = Anchor.BottomRight,
-                                          Origin = Anchor.BottomRight,
-                                          Margin = new MarginPadding { Left = 10, Top = 10},
-                                          Size = new Vector2(100, 75),
-                                          Scale = new Vector2(2,2),
-                                          Text = "Save to",
-                                          onButtonClick = SaveFileButtonAction,
-                                    },
-                                    _loadTaskButton = new TDLButton
-                                    {
-                                          Anchor = Anchor.BottomRight,
-                                          Origin = Anchor.BottomRight,
-                                          Margin = new MarginPadding { Left = 10, Top = 10},
-                                          Size = new Vector2(100, 75),
-                                          Scale = new Vector2(2,2),
-                                          Text = "Open file",
-                                          onButtonClick = OpenFileButtonAction,
-                                    },
-                                }
-                            },
-                            new FillFlowContainer
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Direction = FillDirection.Vertical,
-                                Position = new Vector2 { Y = 100.0f },
-                                Children = new Drawable[]
-                                {
-                                    _taskNameText = new TDLBasicText
-                                    {
-                                        Text = "Name:",
-                                        Anchor = Anchor.TopLeft,
-                                        Origin = Anchor.TopLeft,
-                                        Colour = new Color4(200, 200, 200, 255),
-                                        Depth = -1,
-                                        Margin = new MarginPadding{ Bottom = 30 },
-                                        Scale = new Vector2(1.5f, 1.5f),
-                                    },
-                                    _taskPriorityText = new TDLBasicText
-                                    {
-                                        Text = "Priority:",
-                                        Anchor = Anchor.TopLeft,
-                                        Origin = Anchor.TopLeft,
-                                        Colour = new Color4(200, 200, 200, 255),
-                                        Depth = -1,
-                                        Margin = new MarginPadding { Bottom = 30 },
-                                        Scale = new Vector2(1.5f, 1.5f),
-                                    },
-                                    _taskDescText = new TDLBasicText
-                                    {
-                                        Text = "Description:",
-                                        Anchor = Anchor.TopLeft,
-                                        Origin = Anchor.TopLeft,
-                                        Colour = new Color4(200, 200, 200, 255),
-                                        Depth = -1,
-                                        Margin = new MarginPadding { Bottom = 30 },
-                                        Scale = new Vector2(1.5f, 1.5f),
-                                    },
-                                    _taskStatusText = new TDLBasicText
-                                    {
-                                        Text = "Status:",
-                                        Anchor = Anchor.TopLeft,
-                                        Origin = Anchor.TopLeft,
-                                        Colour = new Color4(200, 200, 200, 255),
-                                        Depth = -1,
-                                        Margin = new MarginPadding { Bottom = 30 },
-                                        Scale = new Vector2(1.5f, 1.5f),
-                                    },
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Position = new Vector2 { Y = 100.0f },
+                                        Children = new Drawable[]
+                                        {
+                                            new TDLBasicText
+                                            {
+                                                Text = "Name:",
+                                                Anchor = Anchor.TopLeft,
+                                                Origin = Anchor.TopLeft,
+                                                Colour = new Color4(200, 200, 200, 255),
+                                                Depth = -1,
+                                                Margin = new MarginPadding{ Bottom = 10 },
+                                                Scale = new Vector2(2.5f),
+                                            },
+                                            _taskNameTextBox = new TDLTextBox
+                                            {
+                                                Anchor = Anchor.TopLeft,
+                                                Origin = Anchor.TopLeft,
+                                                Margin = new MarginPadding{ Bottom = 10 },
+                                                Height = 70,
+                                                Width = 450,
+                                                LengthLimit = 64,
+                                                Depth = -1,
+                                            },
+
+                                            new TDLBasicText
+                                            {
+                                                Text = "Priority:",
+                                                Anchor = Anchor.TopLeft,
+                                                Origin = Anchor.TopLeft,
+                                                Colour = new Color4(200, 200, 200, 255),
+                                                Depth = -1,
+                                                Margin = new MarginPadding { Bottom = 10 },
+                                                Scale = new Vector2(2.5f),
+                                            },
+                                            _taskPriorityEnumDrowDown = new TDLEnumDrowDown<TDLPriority>
+                                            {
+                                                Anchor = Anchor.TopLeft,
+                                                Origin = Anchor.TopLeft,
+                                                Margin = new MarginPadding{ Bottom = 10 },
+                                                Colour = new Color4(200, 200, 200, 255),
+                                                Depth = -1,
+                                                Scale = new Vector2(2.0f),
+                                                Width = 400,
+
+                                            },
+                                            new TDLBasicText
+                                            {
+                                                Text = "Description:",
+                                                Anchor = Anchor.TopLeft,
+                                                Origin = Anchor.TopLeft,
+                                                Colour = new Color4(200, 200, 200, 255),
+                                                Depth = -1,
+                                                Margin = new MarginPadding { Bottom = 10 },
+                                                Scale = new Vector2(2.5f),
+                                            },
+                                            _taskDescTextBox = new TDLTextBox
+                                            {
+                                                Anchor = Anchor.TopLeft,
+                                                Origin = Anchor.TopLeft,
+                                                Margin = new MarginPadding{ Bottom = 10 },
+                                                Height = 70,
+                                                Width = 450,
+                                                //LengthLimit = 20,
+                                                Depth = -1,
+                                            },
+
+                                            new TDLBasicText
+                                            {
+                                                Text = "Status:",
+                                                Anchor = Anchor.TopLeft,
+                                                Origin = Anchor.TopLeft,
+                                                Margin = new MarginPadding{ Bottom = 10 },
+                                                Colour = new Color4(200, 200, 200, 255),
+                                                Depth = -1,
+                                                Scale = new Vector2(2.5f),
+                                            },
+                                            _taskStatusEnumDrowDown = new TDLEnumDrowDown<TDLStatusTask>
+                                            {
+                                                //RelativeSizeAxes = Axes.Both,
+                                                Anchor = Anchor.TopLeft,
+                                                Origin = Anchor.TopLeft,
+                                                Margin = new MarginPadding{ Bottom = 10 },
+                                                Colour = new Color4(200, 200, 200, 255),
+                                                Depth = -1,
+                                                Scale = new Vector2(2.0f),
+                                                Width = 400,
+
+                                            },
+
+
+
+
+
+                                        }
+                                    }
                                 }
                             },
                             new Box
                             {
                                 Colour = new Color4(41, 41, 41, 255),
-                                Width = 1200,
-                                Height = 800,
+                                Width = 1600,
+                                RelativeSizeAxes = Axes.Y,
                                 Depth = float.MaxValue,
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
@@ -413,6 +463,34 @@ namespace TDL.Game.Graphics.Screens
             PrepareUITaskNotActive();
 
             LoadTasksFromJson(string.Empty);
+        }
+
+
+        void Save()
+        {
+            var index = tasks.IndexOf(_currentTask);
+            _currentTask.name = _taskNameTextBox.Text;
+            _currentTask.priority = _taskPriorityEnumDrowDown.Current.Value;
+            _currentTask.status = _taskStatusEnumDrowDown.Current.Value;
+            _currentTask.description = _taskDescTextBox.Text;
+
+
+            // FIX ME: very dirty way to update name from scrollContainer 
+            foreach (var child in _scrollflowContainer.Children)
+            {
+                TDLTaskButton button = child as TDLTaskButton;
+
+                if (button.Task == _currentTask)
+                {
+                    button.Text = _currentTask.name;
+                    break;
+                }
+            }
+
+            // Update in list 
+            tasks[index] = _currentTask;
+
+            SaveTasksToJson(string.Empty);
         }
 
         private BasicFileSelector _fileSelector;
@@ -620,7 +698,12 @@ namespace TDL.Game.Graphics.Screens
             {
                 Logger.Error(new NullReferenceException(), "File tools container is null");
             }
-            _fileOpenErrorMessage.Hide();
+
+            if(_fileOpenErrorMessage != null)
+            {
+                _fileOpenErrorMessage.Hide();
+            }
+
             _currentContainer.Add(
                 _filefillFlow = new FillFlowContainer
                 {
@@ -643,49 +726,30 @@ namespace TDL.Game.Graphics.Screens
             PrepareUITaskNotActive();
         }
 
-        // TODO: This is garbage, need to use containers for that
+
         void PrepareUITaskActive()
         {
             _noneText.Hide();
 
             _taskTemplateText.Show();
-            _taskNameText.Show();
-            _taskPriorityText.Show();
-            _taskDescText.Show();
-            _taskStatusText.Show();
-            _closeTaskButton.Show();
-            _saveTaskButton.Show();
-            _loadTaskButton.Show();
+            _taskEditContainer.Show();
         }
 
-        // TODO: This is garbage, need to use containers for that
         void PrepareUITaskNotActive()
         {
             _noneText.Show();
             _taskTemplateText.Show();
 
-            _taskNameText.Hide();
-            _taskPriorityText.Hide();
-            _taskDescText.Hide();
-            _taskStatusText.Hide();
-            _closeTaskButton.Hide();
-            _saveTaskButton.Hide();
-            _loadTaskButton.Hide();
+            _taskEditContainer.Hide();
         }
 
-        // TODO: This is garbage, need to use containers for that
+
         void PrepareUIHideAll()
         {
             _noneText.Hide();
 
             _taskTemplateText.Hide();
-            _taskNameText.Hide();
-            _taskPriorityText.Hide();
-            _taskDescText.Hide();
-            _taskStatusText.Hide();
-            _closeTaskButton.Hide();
-            _saveTaskButton.Hide();
-            _loadTaskButton.Hide();
+            _taskEditContainer.Hide();
         }
 
         void SetTaskAsCurrent(TDLTask task)
@@ -698,17 +762,17 @@ namespace TDL.Game.Graphics.Screens
 
             _currentTask = task;
 
-            _taskNameText.Text = $"Name: {task.name}";
-            _taskPriorityText.Text = $"Priority: {task.priority}";
-            _taskStatusText.Text = $"Status: {task.status}";
-
+            _taskNameTextBox.Text = task.name;
+            _taskPriorityEnumDrowDown.Current.Value = task.priority;
+            _taskStatusEnumDrowDown.Current.Value = task.status;
+            
             if(task.description == string.Empty)
             {
-                _taskDescText.Text = $"Description: None";
+                _taskDescTextBox.Text = $"None";
             }
             else
             {
-                _taskDescText.Text = $"Description: {task.description}";
+                _taskDescTextBox.Text =task.description;
             }
 
             PrepareUITaskActive();
