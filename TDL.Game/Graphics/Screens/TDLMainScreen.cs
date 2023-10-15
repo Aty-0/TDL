@@ -33,6 +33,7 @@ namespace TDL.Game.Graphics.Screens
         private TDLBasicText _descText;
         private TDLTextBox _descTextBox;
         private TDLBasicText _noneText;
+        private TDLBasicText _noneErrorText;
         private TDLButton _noneFileLoadButton;
         private Container _taskEditContainer;
         private TDLTextBox   _taskNameTextBox;
@@ -50,7 +51,6 @@ namespace TDL.Game.Graphics.Screens
         public TDLMainScreen()
         {
             AddInternal(new TDLBackground("bg", new Vector2(12.0f)));
-
             //AddInternal(new Box
             //{ 
             //    Colour = new Color4(34, 30, 30, 255),
@@ -273,6 +273,17 @@ namespace TDL.Game.Graphics.Screens
                                 Position = new Vector2(0.0f, 0.0f),
                                 Scale = new Vector2(3.0f, 3.0f),
                             },
+                            _noneErrorText = new TDLBasicText
+                            {
+                                Text = "",
+                                Anchor = Anchor.BottomCentre,
+                                Origin = Anchor.BottomCentre,
+                                Colour = new Color4(200, 0, 0, 255),
+                                Depth = -1,
+                                //Margin = new MarginPadding{ Bottom = 10 },
+                                Scale = new Vector2(3.0f, 3.0f),
+                            },
+
                             new FillFlowContainer
                             {
                                 Direction = FillDirection.Vertical,
@@ -754,6 +765,7 @@ namespace TDL.Game.Graphics.Screens
         {
             _noneText.Hide();
             _noneFileLoadButton.Hide();
+            _noneErrorText.Hide();
 
             _taskTemplateText.Show();
             _taskEditContainer.Show();
@@ -764,6 +776,7 @@ namespace TDL.Game.Graphics.Screens
             _noneText.Show();
             _noneFileLoadButton.Show();
             _taskTemplateText.Show();
+            _noneErrorText.Hide();
 
             _taskEditContainer.Hide();
         }
@@ -772,6 +785,7 @@ namespace TDL.Game.Graphics.Screens
         void PrepareUIHideAll()
         {
             _noneText.Hide();
+            _noneErrorText.Hide();
             _noneFileLoadButton.Hide();
 
             _taskTemplateText.Hide();
@@ -884,6 +898,8 @@ namespace TDL.Game.Graphics.Screens
         {
             if(_nameTextBox.Text == string.Empty)
             {
+                _noneErrorText.Text = "Fill 'Name' text box";
+                _noneErrorText.FadeInFromZero(500, Easing.In).Delay(2000).FadeOut(1500, Easing.Out);
                 _nameTextBox.CallNotifyInputError();
                 return;
             }
