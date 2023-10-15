@@ -33,7 +33,7 @@ namespace TDL.Game.Graphics.Screens
         private TDLBasicText _descText;
         private TDLTextBox _descTextBox;
         private TDLBasicText _noneText;
-
+        private TDLButton _noneFileLoadButton;
         private Container _taskEditContainer;
         private TDLTextBox   _taskNameTextBox;
         private TDLTextBox   _taskDescTextBox;
@@ -273,18 +273,34 @@ namespace TDL.Game.Graphics.Screens
                                 Position = new Vector2(0.0f, 0.0f),
                                 Scale = new Vector2(3.0f, 3.0f),
                             },
-                            
-                            _noneText = new TDLBasicText
+                            new FillFlowContainer
                             {
-                                Text = "None",
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Colour = new Color4(200, 0, 0, 255),
-                                Depth = -1,
-                                Margin = new MarginPadding{ Bottom = 10 },
-                                Scale = new Vector2(3.0f, 3.0f),
+                                Direction = FillDirection.Vertical,
+                                RelativeSizeAxes = Axes.Both,
+                                Children = new Drawable[]
+                                {
+                                    _noneText = new TDLBasicText
+                                    {
+                                        Text = "None",
+                                        Anchor = Anchor.Centre,
+                                        Origin = Anchor.Centre,
+                                        Colour = new Color4(200, 0, 0, 255),
+                                        Depth = -1,
+                                        Margin = new MarginPadding{ Bottom = 10 },
+                                        Scale = new Vector2(3.0f, 3.0f),
+                                    },
+                                    _noneFileLoadButton = new TDLButton
+                                    {
+                                           Anchor = Anchor.Centre,
+                                           Origin = Anchor.Centre,
+                                           //Margin = new MarginPadding { Left = 10, Top = 10},
+                                           Size = new Vector2(200, 155),
+                                           Scale = new Vector2(2,2),
+                                           Text = "Open file",
+                                           onButtonClick = OpenFileButtonAction,
+                                    },
+                                }
                             },
-
                             _taskEditContainer = new Container
                             {
                                 Anchor = Anchor.Centre,
@@ -539,6 +555,7 @@ namespace TDL.Game.Graphics.Screens
         void CloseFileSelector()
         {
             _currentContainer.Remove(_filefillFlow, true);
+            _fileSelector = null;
             PrepareUITaskNotActive();
         }
         private enum FileSelectorMode
@@ -736,6 +753,7 @@ namespace TDL.Game.Graphics.Screens
         void PrepareUITaskActive()
         {
             _noneText.Hide();
+            _noneFileLoadButton.Hide();
 
             _taskTemplateText.Show();
             _taskEditContainer.Show();
@@ -744,6 +762,7 @@ namespace TDL.Game.Graphics.Screens
         void PrepareUITaskNotActive()
         {
             _noneText.Show();
+            _noneFileLoadButton.Show();
             _taskTemplateText.Show();
 
             _taskEditContainer.Hide();
@@ -753,6 +772,7 @@ namespace TDL.Game.Graphics.Screens
         void PrepareUIHideAll()
         {
             _noneText.Hide();
+            _noneFileLoadButton.Hide();
 
             _taskTemplateText.Hide();
             _taskEditContainer.Hide();
