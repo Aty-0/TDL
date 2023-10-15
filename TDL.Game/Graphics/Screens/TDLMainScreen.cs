@@ -721,6 +721,12 @@ namespace TDL.Game.Graphics.Screens
 
         void ClearTasks()
         {
+            // TODO: Error message
+            if(_fileSelector != null)
+            {
+                return;
+            }
+
             tasks.Clear();
             _scrollflowContainer.Clear();
             PrepareUITaskNotActive();
@@ -754,6 +760,11 @@ namespace TDL.Game.Graphics.Screens
 
         void SetTaskAsCurrent(TDLTask task)
         {
+            if (_fileSelector != null)
+            {
+                return;
+            }
+
             if (task == null)
             {
                 Logger.Log("Can't set task because it is null", level: LogLevel.Error);
