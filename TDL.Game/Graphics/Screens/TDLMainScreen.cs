@@ -405,25 +405,42 @@ namespace TDL.Game.Graphics.Screens
         }
 
         private BasicFileSelector _fileSelector;
-        private string _fileSelectorPath;
         private FillFlowContainer _filefillFlow;
+        private TDLTextBox _fileTextBox;
+
         void SaveTo()
         {
+            if(_fileTextBox.Text == string.Empty)
+            {
+                _fileTextBox.CallNotifyInputError();
+                return;
+            }
 
+            var path = _fileSelector.CurrentPath.Value.FullName + "\\" + _fileTextBox.Text + ".json";
+            SaveTasksToJson(path);
+
+            CloseFileSelector();
+        }
+
+        void CloseFileSelector()
+        {
+            _currentContainer.Remove(_filefillFlow, true);
+            PrepareUITaskActive();
         }
 
         void OpenFileSelector()
         {
-            var c1 = new Container
+            var _fileSelectorContainer = new Container
             {
-                Anchor = Anchor.BottomCentre,
-                Origin = Anchor.BottomCentre,
-                RelativeSizeAxes = Axes.Both,
-                Height = 500,
+                Anchor = Anchor.TopCentre,
+                Origin = Anchor.TopCentre,
+                RelativeSizeAxes = Axes.X,
+                Height = 600,
                 Children = new Drawable[]
                 {
                     _fileSelector = new BasicFileSelector
                     {
+                        //Height = 500,
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                         RelativeSizeAxes = Axes.Both
@@ -431,23 +448,62 @@ namespace TDL.Game.Graphics.Screens
                 }
             };
 
-            var c2 = new Container
+            var _fileToolsContainer = new Container
             {
-                Anchor = Anchor.BottomCentre,
-                Origin = Anchor.BottomCentre,
-                RelativeSizeAxes = Axes.Both,
+                Anchor = Anchor.TopCentre,
+                Origin = Anchor.TopCentre,
+                RelativeSizeAxes = Axes.X,
+                Height = 200,
                 Children = new Drawable[]
                 {
-                    new TDLButton
+                    new FillFlowContainer
                     {
-                          Anchor = Anchor.BottomLeft,
-                          Origin = Anchor.BottomLeft,
-                          Margin = new MarginPadding { Left = 50, Top = 10},
-                          Size = new Vector2(100, 75),
-                          Scale = new Vector2(2,2),
-                          Text = "Save",
-                          onButtonClick = SaveTo,
-                    },
+                        Direction = FillDirection.Horizontal,
+                        RelativeSizeAxes = Axes.Both,
+                        Children = new Drawable[]
+                        {
+                            new TDLButton
+                            {
+                                  Anchor = Anchor.BottomLeft,
+                                  Origin = Anchor.BottomLeft,
+                                  Margin = new MarginPadding { Left = 10, Top = 10},
+                                  Size = new Vector2(100, 75),
+                                  Scale = new Vector2(2,2),
+                                  Text = "Save",
+                                  onButtonClick = SaveTo,
+                            },
+                            new TDLButton
+                            {
+                                  Anchor = Anchor.BottomLeft,
+                                  Origin = Anchor.BottomLeft,
+                                  Margin = new MarginPadding { Left = 10, Top = 10},
+                                  Size = new Vector2(100, 75),
+                                  Scale = new Vector2(2,2),
+                                  Text = "Close",
+                                  onButtonClick = CloseFileSelector,
+                            },
+                            new TDLBasicText
+                            {
+                                Text = "File Name:",
+                                Anchor = Anchor.BottomLeft,
+                                Origin = Anchor.BottomLeft,
+                                Colour = new Color4(200, 200, 200, 255),
+                                Depth = -1,
+                                Margin = new MarginPadding { Left = 10, Top = 50},
+                                Scale = new Vector2(2.0f, 2.0f),
+                            },
+                             _fileTextBox = new TDLTextBox
+                             {
+                                 Anchor = Anchor.BottomLeft,
+                                 Origin = Anchor.BottomLeft,
+                                 Margin = new MarginPadding { Left = 10, Top = 30},
+                                 Height = 75,
+                                 Width = 500,
+                                 //LengthLimit = 20,
+                                 Depth = -1,
+                             },
+                        }
+                    }
                 }
             };
 
@@ -458,15 +514,11 @@ namespace TDL.Game.Graphics.Screens
                     RelativeSizeAxes = Axes.Both,
                     Children = new Drawable[]
                     {
-                        c1, c2
+                       _fileSelectorContainer, _fileToolsContainer
                     }
                 }
             );
             PrepareUIHideAll();
-
-            //_fileSelectorPath = _fileSelector.CurrentPath.Value.FullName;
-
-
 
         }
 
