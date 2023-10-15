@@ -36,6 +36,7 @@ namespace TDL.Game.Graphics.Screens
 
         private TDLButton _closeTaskButton;
         private TDLButton _saveTaskButton;
+        private TDLButton _loadTaskButton;
         private TDLBasicText _taskTemplateText;
         private TDLBasicText _taskNameText;
         private TDLBasicText _taskDescText;
@@ -314,7 +315,7 @@ namespace TDL.Game.Graphics.Screens
                                     {
                                           Anchor = Anchor.BottomRight,
                                           Origin = Anchor.BottomRight,
-                                          Margin = new MarginPadding { Left = 10, Top = 10 },
+                                          Margin = new MarginPadding { Left = 30, Top = 10 },
                                           Size = new Vector2(100, 75),
                                           Scale = new Vector2(2,2),
                                           Text = "Close task",
@@ -324,11 +325,21 @@ namespace TDL.Game.Graphics.Screens
                                     {
                                           Anchor = Anchor.BottomRight,
                                           Origin = Anchor.BottomRight,
-                                          Margin = new MarginPadding { Left = 50, Top = 10},
+                                          Margin = new MarginPadding { Left = 10, Top = 10},
                                           Size = new Vector2(100, 75),
                                           Scale = new Vector2(2,2),
                                           Text = "Save to",
-                                          onButtonClick = OpenFileSelector,
+                                          onButtonClick = SaveFileButtonAction,
+                                    },
+                                    _loadTaskButton = new TDLButton
+                                    {
+                                          Anchor = Anchor.BottomRight,
+                                          Origin = Anchor.BottomRight,
+                                          Margin = new MarginPadding { Left = 10, Top = 10},
+                                          Size = new Vector2(100, 75),
+                                          Scale = new Vector2(2,2),
+                                          Text = "Open file",
+                                          onButtonClick = OpenFileButtonAction,
                                     },
                                 }
                             },
@@ -407,6 +418,31 @@ namespace TDL.Game.Graphics.Screens
         private BasicFileSelector _fileSelector;
         private FillFlowContainer _filefillFlow;
         private TDLTextBox _fileTextBox;
+        private TDLBasicText _fileOpenErrorMessage;
+        void LoadFrom()
+        {
+            var file = _fileSelector.CurrentFile.Value;
+            if(file == null)
+            {
+                _fileOpenErrorMessage.Text = "File is not selected";
+                _fileOpenErrorMessage.FadeInFromZero(500, Easing.In).Delay(2000).FadeOut(1500, Easing.Out);
+                return;
+            }
+
+            var ext = file.Extension;
+
+            if(ext != ".json")
+            {
+                _fileOpenErrorMessage.Text = "Wrong file extension. Extension must be json!";
+                _fileOpenErrorMessage.FadeInFromZero(500, Easing.In).Delay(2000).FadeOut(1500, Easing.Out);
+                return;
+            }
+
+            var path = file.FullName;
+            LoadTasksFromJson(path);
+
+            CloseFileSelector();
+        }
 
         void SaveTo()
         {
@@ -425,10 +461,25 @@ namespace TDL.Game.Graphics.Screens
         void CloseFileSelector()
         {
             _currentContainer.Remove(_filefillFlow, true);
-            PrepareUITaskActive();
+            PrepareUITaskNotActive();
+        }
+        private enum FileSelectorMode
+        {
+            Load, 
+            Save,
         }
 
-        void OpenFileSelector()
+        void OpenFileButtonAction()
+        {
+            OpenFileSelector(FileSelectorMode.Load);
+        }
+
+        void SaveFileButtonAction()
+        {
+            OpenFileSelector(FileSelectorMode.Save);
+        }
+
+        void OpenFileSelector(FileSelectorMode mode)
         {
             var _fileSelectorContainer = new Container
             {
@@ -448,65 +499,128 @@ namespace TDL.Game.Graphics.Screens
                 }
             };
 
-            var _fileToolsContainer = new Container
+            Container _fileToolsContainer = null;
+            switch(mode)
             {
-                Anchor = Anchor.TopCentre,
-                Origin = Anchor.TopCentre,
-                RelativeSizeAxes = Axes.X,
-                Height = 200,
-                Children = new Drawable[]
-                {
-                    new FillFlowContainer
+                case FileSelectorMode.Load:
+                    _fileToolsContainer = new Container
                     {
-                        Direction = FillDirection.Horizontal,
-                        RelativeSizeAxes = Axes.Both,
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre,
+                        RelativeSizeAxes = Axes.X,
+                        Height = 200,
                         Children = new Drawable[]
                         {
-                            new TDLButton
+                            new FillFlowContainer
                             {
-                                  Anchor = Anchor.BottomLeft,
-                                  Origin = Anchor.BottomLeft,
-                                  Margin = new MarginPadding { Left = 10, Top = 10},
-                                  Size = new Vector2(100, 75),
-                                  Scale = new Vector2(2,2),
-                                  Text = "Save",
-                                  onButtonClick = SaveTo,
-                            },
-                            new TDLButton
-                            {
-                                  Anchor = Anchor.BottomLeft,
-                                  Origin = Anchor.BottomLeft,
-                                  Margin = new MarginPadding { Left = 10, Top = 10},
-                                  Size = new Vector2(100, 75),
-                                  Scale = new Vector2(2,2),
-                                  Text = "Close",
-                                  onButtonClick = CloseFileSelector,
-                            },
-                            new TDLBasicText
-                            {
-                                Text = "File Name:",
-                                Anchor = Anchor.BottomLeft,
-                                Origin = Anchor.BottomLeft,
-                                Colour = new Color4(200, 200, 200, 255),
-                                Depth = -1,
-                                Margin = new MarginPadding { Left = 10, Top = 50},
-                                Scale = new Vector2(2.0f, 2.0f),
-                            },
-                             _fileTextBox = new TDLTextBox
-                             {
-                                 Anchor = Anchor.BottomLeft,
-                                 Origin = Anchor.BottomLeft,
-                                 Margin = new MarginPadding { Left = 10, Top = 30},
-                                 Height = 75,
-                                 Width = 500,
-                                 //LengthLimit = 20,
-                                 Depth = -1,
-                             },
-                        }
-                    }
-                }
-            };
+                                Direction = FillDirection.Horizontal,
+                                RelativeSizeAxes = Axes.Both,
+                                Children = new Drawable[]
+                                {
+                                    new TDLButton
+                                    {
+                                          Anchor = Anchor.BottomLeft,
+                                          Origin = Anchor.BottomLeft,
+                                          Margin = new MarginPadding { Left = 10, Top = 10},
+                                          Size = new Vector2(100, 75),
+                                          Scale = new Vector2(2,2),
+                                          Text = "Load",
+                                          onButtonClick = LoadFrom,
+                                    },
+                                    new TDLButton
+                                    {
+                                          Anchor = Anchor.BottomLeft,
+                                          Origin = Anchor.BottomLeft,
+                                          Margin = new MarginPadding { Left = 10, Top = 10},
+                                          Size = new Vector2(100, 75),
+                                          Scale = new Vector2(2,2),
+                                          Text = "Close",
+                                          onButtonClick = CloseFileSelector,
+                                    },
 
+                                    _fileOpenErrorMessage = new TDLBasicText
+                                    {
+                                        Text = "",
+                                        Anchor = Anchor.BottomLeft,
+                                        Origin = Anchor.BottomLeft,
+                                        Margin = new MarginPadding { Left = 10, Top = 10},
+                                        Colour = new Color4(255, 0, 0, 255),
+                                        Depth = -1,
+              
+                                        Scale = new Vector2(1.5f, 1.5f),
+                                    },
+                                }
+                            }
+                        }
+                    };
+                    break;
+                case FileSelectorMode.Save:
+                    _fileToolsContainer  = new Container
+                    {
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre,
+                        RelativeSizeAxes = Axes.X,
+                        Height = 200,
+                        Children = new Drawable[]
+                        {
+                            new FillFlowContainer
+                            {
+                                Direction = FillDirection.Horizontal,
+                                RelativeSizeAxes = Axes.Both,
+                                Children = new Drawable[]
+                                {
+                                    new TDLButton
+                                    {
+                                          Anchor = Anchor.BottomLeft,
+                                          Origin = Anchor.BottomLeft,
+                                          Margin = new MarginPadding { Left = 10, Top = 10},
+                                          Size = new Vector2(100, 75),
+                                          Scale = new Vector2(2,2),
+                                          Text = "Save",
+                                          onButtonClick = SaveTo,
+                                    },
+                                    new TDLButton
+                                    {
+                                          Anchor = Anchor.BottomLeft,
+                                          Origin = Anchor.BottomLeft,
+                                          Margin = new MarginPadding { Left = 10, Top = 10},
+                                          Size = new Vector2(100, 75),
+                                          Scale = new Vector2(2,2),
+                                          Text = "Close",
+                                          onButtonClick = CloseFileSelector,
+                                    },
+                                    new TDLBasicText
+                                    {
+                                        Text = "File Name:",
+                                        Anchor = Anchor.BottomLeft,
+                                        Origin = Anchor.BottomLeft,
+                                        Colour = new Color4(200, 200, 200, 255),
+                                        Depth = -1,
+                                        Margin = new MarginPadding { Left = 10, Top = 50},
+                                        Scale = new Vector2(2.0f, 2.0f),
+                                    },
+                                     _fileTextBox = new TDLTextBox
+                                     {
+                                         Anchor = Anchor.BottomLeft,
+                                         Origin = Anchor.BottomLeft,
+                                         Margin = new MarginPadding { Left = 10, Top = 30},
+                                         Height = 75,
+                                         Width = 500,
+                                         //LengthLimit = 20,
+                                         Depth = -1,
+                                     },
+                                }
+                            }
+                        }
+                    };
+                    break;
+
+            }
+            if (_fileToolsContainer == null)
+            {
+                Logger.Error(new NullReferenceException(), "File tools container is null");
+            }
+            _fileOpenErrorMessage.Hide();
             _currentContainer.Add(
                 _filefillFlow = new FillFlowContainer
                 {
@@ -529,6 +643,7 @@ namespace TDL.Game.Graphics.Screens
             PrepareUITaskNotActive();
         }
 
+        // TODO: This is garbage, need to use containers for that
         void PrepareUITaskActive()
         {
             _noneText.Hide();
@@ -540,8 +655,10 @@ namespace TDL.Game.Graphics.Screens
             _taskStatusText.Show();
             _closeTaskButton.Show();
             _saveTaskButton.Show();
+            _loadTaskButton.Show();
         }
 
+        // TODO: This is garbage, need to use containers for that
         void PrepareUITaskNotActive()
         {
             _noneText.Show();
@@ -553,8 +670,10 @@ namespace TDL.Game.Graphics.Screens
             _taskStatusText.Hide();
             _closeTaskButton.Hide();
             _saveTaskButton.Hide();
+            _loadTaskButton.Hide();
         }
 
+        // TODO: This is garbage, need to use containers for that
         void PrepareUIHideAll()
         {
             _noneText.Hide();
@@ -566,6 +685,7 @@ namespace TDL.Game.Graphics.Screens
             _taskStatusText.Hide();
             _closeTaskButton.Hide();
             _saveTaskButton.Hide();
+            _loadTaskButton.Hide();
         }
 
         void SetTaskAsCurrent(TDLTask task)
