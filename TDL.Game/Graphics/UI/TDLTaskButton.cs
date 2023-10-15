@@ -21,9 +21,34 @@ namespace TDL.Game.Graphics.UI
 
             CornerRadius = 0.0f;
 
-            Background.Colour = new Color4(150, 140, 140, 255);
         }
- 
+        protected override void LoadComplete()
+        {
+            SetPriorityColor();
+            base.LoadComplete();
+        }
+
+        public void SetPriorityColor()
+        {
+            switch (Task.priority)
+            {
+                case TDLPriority.VeryHigh:
+                    Background.Colour = new Color4(220, 20, 60, 255);
+                    break;
+                case TDLPriority.High:
+                    Background.Colour = new Color4(250, 128, 114, 255);
+                    break;
+                case TDLPriority.Medium:
+                    Background.Colour = new Color4(147, 112, 219, 255);
+                    break;
+                case TDLPriority.Low:
+                case TDLPriority.VeryLow:
+                    Background.Colour = new Color4(192, 192, 192, 255);
+                    break;
+
+            }
+        }
+
         protected override SpriteText CreateText()
         {
             this.SpriteText = new SpriteText();

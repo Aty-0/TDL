@@ -38,7 +38,8 @@ namespace TDL.Game.Graphics.UI
 
         protected override void LoadComplete()
         {
-            ResizeText();      
+            ResizeText();
+            base.LoadComplete();
         }
 
         public virtual void ResizeText()

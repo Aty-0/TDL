@@ -510,6 +510,8 @@ namespace TDL.Game.Graphics.Screens
                 if (button.Task == _currentTask)
                 {
                     button.Text = _currentTask.name;
+                    button.Task = _currentTask;
+                    button.SetPriorityColor();
                     break;
                 }
             }
